@@ -28,6 +28,7 @@ namespace Systems
                 carAspects.Add(carAspect);
             }
 
+            // This issue is that in here cars can be retargetted twice 
             for (int i = 0; i < carAspects.Length; i++)
             {
                 foreach (var roadSegment in SystemAPI.Query<RoadSegmentAspect>().WithNone<IntersectionSegment>())
