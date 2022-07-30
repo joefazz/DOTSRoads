@@ -20,26 +20,44 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
+            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            NativeList<CarAspect> carAspects = new NativeList<CarAspect>(32, Allocator.Temp);
+
             foreach (var carAspect in SystemAPI.Query<CarAspect>().WithAll<WaitingAtIntersection>())
             {
-                var nextIntersection = carAspect.NextIntersection;
-                
-                foreach (var roadSegment in SystemAPI.Query<RoadSegmentAspect>())
+                carAspects.Add(carAspect);
+            }
+
+            for (int i = 0; i < carAspects.Length; i++)
+            {
+                foreach (var roadSegment in SystemAPI.Query<RoadSegmentAspect>().WithNone<IntersectionSegment>())
                 {
-                    // Debug.Log(carAspect.NextIntersection);
-                    if (roadSegment.StartIntersection == carAspect.NextIntersection)
+                    var carAspect = carAspects[i];
+                    if (roadSegment.StartIntersection == carAspect.NextIntersection && roadSegment.Entity != carAspect.RoadSegmentEntity)
                     {
-                        nextIntersection = roadSegment.EndIntersection;
+                        Debug.Log(carAspect.NextIntersection);
+                        Debug.Log("Retargetting NextIntersection to: " + roadSegment.EndIntersection);
+                        carAspect.NextIntersection = roadSegment.EndIntersection;
+                        carAspect.T = 0;
+                        carAspect.RoadSegmentEntity = roadSegment.Entity;
+                        ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
+                        i++;
                     }
-                    else if (roadSegment.EndIntersection == carAspect.NextIntersection)
+                    else if (roadSegment.EndIntersection == carAspect.NextIntersection && roadSegment.Entity != carAspect.RoadSegmentEntity)
                     {
-                        nextIntersection = roadSegment.StartIntersection;
+                        Debug.Log(carAspect.NextIntersection);
+                        Debug.Log("Retargetting NextIntersection to: " + roadSegment.StartIntersection);
+                        carAspect.NextIntersection = roadSegment.StartIntersection;
+                        carAspect.T = 0;
+                        carAspect.RoadSegmentEntity = roadSegment.Entity;
+                        ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
+                        i++;
                     }
                 }
-
-                carAspect.NextIntersection = nextIntersection;
-
             }
+
+            ecb.Playback(state.EntityManager);
+            ecb.Dispose();
         }
     }
 }

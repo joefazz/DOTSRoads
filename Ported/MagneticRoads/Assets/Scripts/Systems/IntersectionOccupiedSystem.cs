@@ -30,21 +30,21 @@ namespace Systems
         public void OnUpdate(ref SystemState state)
         {
             state.Enabled = false;
-            var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
-            var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
-
-            foreach (var carAspect in SystemAPI.Query<CarAspect>().WithAll<WaitingAtIntersection>().WithNone<TraversingIntersection>())
-            {
-                var intersection = SystemAPI.GetComponent<Intersection>(carAspect.NextIntersection);
-                if (intersection.IsOccupied)
-                {
-                    ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
-                }
-                else
-                {
-                    intersection.IsOccupied = true;
-                }
-            }
+            // var ecbSingleton = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+            // var ecb = ecbSingleton.CreateCommandBuffer(state.WorldUnmanaged);
+            //
+            // foreach (var carAspect in SystemAPI.Query<CarAspect>().WithAll<WaitingAtIntersection>().WithNone<TraversingIntersection>())
+            // {
+            //     var intersection = SystemAPI.GetComponent<Intersection>(carAspect.NextIntersection);
+            //     if (intersection.IsOccupied)
+            //     {
+            //         ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
+            //     }
+            //     else
+            //     {
+            //         intersection.IsOccupied = true;
+            //     }
+            // }
         }
     }
 }

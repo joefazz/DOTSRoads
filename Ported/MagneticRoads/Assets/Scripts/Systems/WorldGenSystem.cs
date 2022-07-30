@@ -174,15 +174,15 @@ namespace Systems
                         URPMaterialPropertyBaseColor RandomColor()
                         {
                             // 0.618034005f == 2 / (math.sqrt(5) + 1) == inverse of the golden ratio
-                            hue = (hue + 0.618034005f) % 1;
+                            hue = (hue + 0.618034005f + random.NextFloat(0, 1)) % 1;
                             var color = UnityEngine.Color.HSVToRGB(hue, 1.0f, 1.0f);
                             return new URPMaterialPropertyBaseColor {Value = (UnityEngine.Vector4) color};
                         }
 
                         // Populate Dynamic buffers with random amount of cars
-                        for (int laneNumber = 1; laneNumber < 5; laneNumber++)
+                        for (int laneNumber = 1; laneNumber < 2; laneNumber++)
                         {
-                            for (int carNumber = 0; carNumber < random.NextInt(0, 50); carNumber++)
+                            for (int carNumber = 0; carNumber < 1; carNumber++)
                             {
                                 var carEntity = ecb.Instantiate(config.CarPrefab);
                                 ecb.SetComponent(carEntity, new Car

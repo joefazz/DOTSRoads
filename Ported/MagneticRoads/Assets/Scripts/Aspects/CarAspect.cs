@@ -13,13 +13,12 @@ namespace Aspects
         readonly RefRW<URPMaterialPropertyBaseColor> m_BaseColor;
 
         public readonly Entity Entity;
-        
+
         public float3 Position
         {
             get => m_TransformAspect.Position;
             set => m_TransformAspect.Position = value;
         }
-
         public Entity NextIntersection
         {
             get => m_Car.ValueRO.NextIntersection;
