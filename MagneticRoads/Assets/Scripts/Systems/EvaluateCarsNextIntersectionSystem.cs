@@ -20,14 +20,14 @@ namespace Systems
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Allocator.Temp);
+            var ecb = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>().CreateCommandBuffer(state.WorldUnmanaged);
             NativeList<CarAspect> carAspects = new NativeList<CarAspect>(32, Allocator.Temp);
 
             foreach (var carAspect in SystemAPI.Query<CarAspect>().WithAll<WaitingAtIntersection>())
             {
                 carAspects.Add(carAspect);
             }
-
+            
             // This issue is that in here cars can be retargetted twice 
             for (int i = 0; i < carAspects.Length; i++)
             {
@@ -36,29 +36,22 @@ namespace Systems
                     var carAspect = carAspects[i];
                     if (roadSegment.StartIntersection == carAspect.NextIntersection && roadSegment.Entity != carAspect.RoadSegmentEntity)
                     {
-                        Debug.Log(carAspect.NextIntersection);
-                        Debug.Log("Retargetting NextIntersection to: " + roadSegment.EndIntersection);
                         carAspect.NextIntersection = roadSegment.EndIntersection;
                         carAspect.T = 0;
                         carAspect.RoadSegmentEntity = roadSegment.Entity;
                         ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
-                        i++;
+                        i = (i + 1) % carAspects.Length;
                     }
                     else if (roadSegment.EndIntersection == carAspect.NextIntersection && roadSegment.Entity != carAspect.RoadSegmentEntity)
                     {
-                        Debug.Log(carAspect.NextIntersection);
-                        Debug.Log("Retargetting NextIntersection to: " + roadSegment.StartIntersection);
                         carAspect.NextIntersection = roadSegment.StartIntersection;
                         carAspect.T = 0;
                         carAspect.RoadSegmentEntity = roadSegment.Entity;
                         ecb.SetComponentEnabled<WaitingAtIntersection>(carAspect.Entity, false);
-                        i++;
+                        i = (i + 1) % carAspects.Length;
                     }
                 }
             }
-
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
         }
     }
 }
